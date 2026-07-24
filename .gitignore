@@ -29,3 +29,6 @@ Desktop.ini
 .idea/
 *.swp
 *.swo
+
+# local publish helper (not for the repo)
+PUBLICAR_EN_GITHUB.command
