@@ -1,0 +1,20 @@
+{
+  "hotkey": [
+    "alt",
+    "ctrl"
+  ],
+  "model_size": "small",
+  "language": "en",
+  "remove_fillers": true,
+  "backtrack": true,
+  "numbered_lists": true,
+  "smart_punctuation": true,
+  "ai_rewrite": true,
+  "ai_provider": "Gemini",
+  "ai_api_keys": {
+    "Gemini": "",
+    "OpenAI": "",
+    "Claude": ""
+  },
+  "ai_style": "Just clean up my dictation: fix grammar and punctuation, and remove repetitions and self-corrections, keeping only the corrected version. Keep my language (Spanish stays Spanish), my casual tone, and roughly my own wording and length. Never add new content, greetings, sign-offs, or flourishes."
+}
