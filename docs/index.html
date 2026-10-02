@@ -46,7 +46,7 @@
   .dark h2{margin:0 0 10px;color:#f4eedd}
   .dark p{color:#b9b1a0;margin:0;max-width:620px}
   ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:12px}
-  ol.steps li{counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px 18px 64px;position:relative}
+  ol.steps li{min-width:0;counter-increment:s;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px 18px 64px;position:relative}
   ol.steps li::before{content:counter(s);position:absolute;left:20px;top:16px;width:30px;height:30px;border-radius:50%;background:var(--v);color:#fff;font-weight:800;display:grid;place-items:center}
   pre{margin:10px 0 0;background:var(--dark);color:#f4eedd;border-radius:12px;padding:14px 16px;overflow-x:auto;font:13px/1.6 ui-monospace,Menlo,monospace}
   kbd{font-family:inherit;font-weight:700;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:0 6px;background:var(--card)}
