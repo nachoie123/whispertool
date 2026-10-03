@@ -1,4 +1,12 @@
 import os
+import multiprocessing
+
+# Packaged app: tqdm (inside huggingface_hub/mlx-whisper) starts
+# multiprocessing's resource tracker, which re-runs THIS executable. Without
+# freeze_support() that child would open a second WhisperTool (and its child
+# a third...). It must run before anything else.
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
 
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
@@ -32,10 +40,10 @@ except ImportError:
 # faster than it runs on CPU (benchmarked 1.8s vs 2.2-4.8s for 11s audio;
 # the same turbo model on CPU took 9.3s).
 MLX_REPO = "mlx-community/whisper-large-v3-turbo"
-# Vocabulary hint so proper nouns the user says (Nacho, IE...) beat
-# lookalikes (NATO).
-WHISPER_PROMPT = ("Nacho San Benito. IE University, Madrid. Enrique. "
-                  "Claude Code. WhisperTool.")
+MLX_SIZE = "~1.6 GB"
+# Vocabulary hint so proper nouns the user says beat lookalikes (e.g. a name
+# heard as "NATO"). Per user, in config.json "vocabulary"; empty by default so
+# nobody else's dictation is nudged towards someone's names.
 from pynput import keyboard as pynput_kb
 import pyperclip
 import pyautogui
@@ -53,8 +61,20 @@ IS_MAC = platform.system() == "Darwin"
 PASTE_KEYS = ("command", "v") if IS_MAC else ("ctrl", "v")
 
 # ── Paths ───────────────────────────────────────────────────────────
-if getattr(sys, "frozen", False):
-    APP_DIR = os.path.dirname(sys.executable)
+# Packaged WhisperTool.app: user data (config.json with the API keys, cue
+# sounds) lives in ~/Library/Application Support/WhisperTool — never inside
+# the bundle. Run from the repo: next to main.py, as before.
+FROZEN = getattr(sys, "frozen", False)
+if FROZEN:
+    APP_DIR = os.path.expanduser("~/Library/Application Support/WhisperTool")
+    os.makedirs(APP_DIR, mode=0o700, exist_ok=True)
+    # python.org Python ships no CA certificates: without this the model
+    # download and the AI calls fail with CERTIFICATE_VERIFY_FAILED.
+    try:
+        import certifi
+        os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    except ImportError:
+        pass
 else:
     APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -101,6 +121,43 @@ def _ensure_beeps():
     except Exception as e:
         print(f"[!] beep wav generation failed: {e}", flush=True)
 
+
+def fetch_model(repo, on_progress=None, cache_dir=None):
+    """Make sure a Hugging Face model is in the local cache. First run only:
+    downloads it (>1 GB for the GPU model) calling on_progress(mb_written),
+    so the UI can say "Downloading…" instead of looking frozen. Returns the
+    local snapshot folder."""
+    from huggingface_hub import snapshot_download
+    from io import StringIO
+    from tqdm import tqdm
+    try:
+        return snapshot_download(repo, local_files_only=True,
+                                 cache_dir=cache_dir)
+    except Exception:
+        pass  # not cached yet -> download
+
+    class Progress(tqdm):
+        # A plain tqdm (not huggingface's) is never auto-disabled, even with
+        # no terminal attached as in the .app; its text goes nowhere.
+        # snapshot_download sums every file into two byte bars: "Downloading
+        # bytes" (network, ~10 updates/s) and "Reconstructing" (written to
+        # disk, can jump at the end with Xet). Report the furthest of both.
+        def __init__(self, *args, **kwargs):
+            kwargs.update(disable=False, file=StringIO())
+            super().__init__(*args, **kwargs)
+
+        def update(self, n=1):
+            out = super().update(n)
+            if on_progress and self.unit == "B" and self.n > best[0]:
+                best[0] = self.n
+                on_progress(self.n / 1e6)
+            return out
+
+    best = [0]
+
+    return snapshot_download(repo, cache_dir=cache_dir, tqdm_class=Progress)
+
+
 # ── Version ────────────────────────────────────────────────────────
 # When frozen, --add-data bundles VERSION inside the temp extraction dir
 _BUNDLE_DIR = getattr(sys, "_MEIPASS", APP_DIR)
@@ -124,6 +181,7 @@ DEFAULT_CONFIG = {
     "ai_provider": "Gemini",
     "ai_api_keys": {"Gemini": "", "OpenAI": "", "Claude": ""},
     "ai_style": "",
+    "vocabulary": "",
 }
 
 pyautogui.PAUSE = 0
@@ -187,11 +245,13 @@ def load_config():
 
 
 def save_config(cfg):
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(cfg, f, indent=2)
     # config.json holds API keys in plaintext. Restrict it to the owner only
     # (0600) so no other local account — or a synced/shared folder — can read
-    # them. No-op on Windows, which ignores POSIX modes.
+    # them: created 0600 from the start (no world-readable window), and
+    # chmod'ed for files from older versions. No-op on Windows.
+    fd = os.open(CONFIG_PATH, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as f:
+        json.dump(cfg, f, indent=2)
     try:
         os.chmod(CONFIG_PATH, 0o600)
     except OSError:
@@ -690,7 +750,7 @@ class NativeOverlay:
 # ── Application ─────────────────────────────────────────────────────
 
 class App:
-    def __init__(self):
+    def __init__(self, hooks=True):
         self.cfg = load_config()
         self.hotkey_set = set(self.cfg["hotkey"])
 
@@ -717,6 +777,8 @@ class App:
         self._pending_status = "loading"
         self._pending_history = None
         self._pending_ai_error = None  # Error text from AI call, shown in UI
+        self._perm_missing = []  # macOS permissions still off (UI banner)
+        self._pending_perm = False
         self._last_show_check = 0.0  # throttle for the .show flag poll in _tick
         _ensure_beeps()  # render cue WAVs once (played via afplay, not sounddevice)
 
@@ -761,19 +823,29 @@ class App:
                 print("[i] App Nap disabled", flush=True)
             except Exception as e:
                 print(f"[!] App Nap disable failed: {e}", flush=True)
-            try:
-                # Accessory policy: the Python process gets NO Dock icon or
-                # Cmd+Tab entry of its own — the WhisperTool.app applet
-                # (with the custom logo) is the single Dock presence. The
-                # settings window still shows and works normally. Clicking
-                # the Dock logo while running touches the .show flag file,
-                # which _tick() watches to raise this window.
-                if NSApplication is not None:
-                    NSApplication.sharedApplication().setActivationPolicy_(1)
-                    print("[i] activation policy: accessory "
-                          "(single Dock icon via applet)", flush=True)
-            except Exception as e:
-                print(f"[!] accessory policy failed: {e}", flush=True)
+            if not FROZEN:
+                try:
+                    # Accessory policy: the Python process gets NO Dock icon
+                    # or Cmd+Tab entry of its own — the WhisperTool.app
+                    # applet (with the custom logo) is the single Dock
+                    # presence. The settings window still shows and works
+                    # normally. Clicking the Dock logo while running touches
+                    # the .show flag file, which _tick() watches to raise
+                    # this window. (The packaged .app IS its own Dock icon,
+                    # so it stays a regular app.)
+                    if NSApplication is not None:
+                        NSApplication.sharedApplication() \
+                            .setActivationPolicy_(1)
+                        print("[i] activation policy: accessory "
+                              "(single Dock icon via applet)", flush=True)
+                except Exception as e:
+                    print(f"[!] accessory policy failed: {e}", flush=True)
+            # Dock click on the running app -> show the window; Cmd+Q ->
+            # the same clean shutdown as closing the window.
+            self.root.createcommand("::tk::mac::ReopenApplication",
+                                    self._show_window)
+            self.root.createcommand("::tk::mac::Quit", self._on_close)
+        if IS_MAC and hooks:
             try:
                 # Explicitly request microphone access at startup. Script
                 # bundles confuse TCC attribution, so PortAudio alone never
@@ -786,25 +858,35 @@ class App:
                 if st == 0:
                     AVCaptureDevice \
                         .requestAccessForMediaType_completionHandler_(
-                            "soun",
-                            lambda ok: print(f"[i] mic granted: {ok}",
-                                             flush=True))
-                elif st == 2:
-                    print("[!] mic DENIED — enable WhisperTool in System "
-                          "Settings > Privacy > Microphone", flush=True)
+                            "soun", self._mic_answer)
+                elif st in (1, 2):
+                    self._mic_answer(False)
             except Exception as e:
                 print(f"[!] mic request failed: {e}", flush=True)
+            try:
+                # Pasting (synthetic Cmd+V) needs Accessibility. Prompt=True
+                # shows macOS's own "Open System Settings" dialog once.
+                from HIServices import (AXIsProcessTrustedWithOptions,
+                                        kAXTrustedCheckOptionPrompt)
+                if not AXIsProcessTrustedWithOptions(
+                        {kAXTrustedCheckOptionPrompt: True}):
+                    self._warn_permission("Accessibility")
+            except Exception as e:
+                print(f"[!] accessibility check failed: {e}", flush=True)
 
         self.overlay = NativeOverlay(self.root)
 
         # Load model in background
         threading.Thread(target=self._load_model, daemon=True).start()
 
-        # Global hotkey listener
-        self.listener = pynput_kb.Listener(
-            on_press=self._on_press, on_release=self._on_release,
-        )
-        self.listener.start()
+        # Global hotkey listener. Off in --selftest (no hotkey, no keys).
+        self.listener = None
+        if hooks:
+            self.listener = pynput_kb.Listener(
+                on_press=self._on_press, on_release=self._on_release,
+            )
+            self.listener.start()
+            self.root.after(1500, self._check_listener)
 
         self._tick()
 
@@ -826,6 +908,11 @@ class App:
         self.status_dot.create_oval(2, 2, 12, 12, fill="gray", tags="dot")
         ttk.Label(row, textvariable=self.status_var,
                   font=("", 10)).pack(side="left", padx=8)
+        # Missing macOS permissions: says exactly where to switch them on.
+        self.perm_var = tk.StringVar()
+        self.perm_lbl = ttk.Label(sf, textvariable=self.perm_var,
+                                  foreground="#b91c1c", wraplength=820,
+                                  justify="left")
 
         # ── Hotkey ───────────────────────────────────────────────────
         hf = ttk.LabelFrame(self.root, text="Hotkey (hold to record)")
@@ -1077,6 +1164,11 @@ class App:
     def _load_model(self):
         if mlx_whisper is not None:
             try:
+                # First run: the GPU model (~1.6 GB) is downloaded from
+                # Hugging Face; the status line shows the MB so far.
+                fetch_model(MLX_REPO, lambda mb: setattr(
+                    self, "_pending_status", ("downloading", mb)))
+                self._pending_status = "loading"
                 # Warm-up on half a second of silence preloads the weights
                 # so the first real dictation is already fast.
                 mlx_whisper.transcribe(
@@ -1090,9 +1182,15 @@ class App:
             except Exception as e:
                 print(f"[!] MLX init failed, using CPU fallback: {e}",
                       flush=True)
-        sz = self.cfg.get("model_size", "base")
-        self.model = WhisperModel(sz, device="cpu", compute_type="int8")
-        self._pending_status = "ready"
+        try:
+            sz = self.cfg.get("model_size", "base")
+            self.model = WhisperModel(sz, device="cpu", compute_type="int8")
+            self._pending_status = "ready"
+        except Exception as e:
+            # Typically: first run with no internet, so neither model could
+            # be downloaded. Say so instead of "Loading model..." forever.
+            print(f"[!] model load failed: {e}", flush=True)
+            self._pending_status = "error"
 
     # ── Audio & Transcription ────────────────────────────────────────
 
@@ -1190,14 +1288,7 @@ class App:
             self._pending_status = "ready"
             return
 
-        tmp_path = tempfile.mktemp(suffix=".wav")
         try:
-            with wave.open(tmp_path, "wb") as wf:
-                wf.setnchannels(1)
-                wf.setsampwidth(2)
-                wf.setframerate(SAMPLE_RATE)
-                wf.writeframes((audio * 32767).astype(np.int16).tobytes())
-
             # language=None -> Whisper auto-detects per utterance, so Spanish
             # speech comes back in Spanish and English in English.
             # condition_on_previous_text=False stops the repeated-phrase
@@ -1208,14 +1299,17 @@ class App:
                 result = mlx_whisper.transcribe(
                     audio, path_or_hf_repo=MLX_REPO, language=None,
                     temperature=0.0, condition_on_previous_text=False,
-                    initial_prompt=WHISPER_PROMPT,
+                    initial_prompt=self.cfg.get("vocabulary") or None,
                 )
                 raw = result["text"].strip()
             else:
+                # CPU path: same in-memory buffer (16 kHz float32). Passing a
+                # WAV path made faster-whisper decode it with PyAV, whose
+                # newer releases dropped an argument it uses.
                 segments, _ = self.model.transcribe(
-                    tmp_path, beam_size=1, language=None, vad_filter=True,
+                    audio, beam_size=1, language=None, vad_filter=True,
                     condition_on_previous_text=False, temperature=0.0,
-                    initial_prompt=WHISPER_PROMPT,
+                    initial_prompt=self.cfg.get("vocabulary") or None,
                 )
                 raw = " ".join(s.text for s in segments).strip()
 
@@ -1299,12 +1393,6 @@ class App:
         except Exception as e:
             print(f"[!] Transcription error: {e}")
         finally:
-            for _ in range(5):
-                try:
-                    os.unlink(tmp_path)
-                    break
-                except (PermissionError, FileNotFoundError):
-                    time.sleep(0.1)
             self.busy = False
             self.overlay.request_hide()
             self._pending_status = "ready"
@@ -1326,6 +1414,54 @@ class App:
         ):
             try:
                 pyautogui.keyUp(mod)
+            except Exception:
+                pass
+
+    # ── macOS permissions ────────────────────────────────────────────
+
+    PERM_HELP = {
+        "Microphone": "Microphone is off for WhisperTool, so it can't hear "
+                      "you. Turn it on in System Settings › Privacy & "
+                      "Security › Microphone.",
+        "Accessibility": "WhisperTool can't paste the text yet. Turn it on "
+                         "in System Settings › Privacy & Security › "
+                         "Accessibility, then quit and reopen WhisperTool.",
+        "Input Monitoring": "WhisperTool can't see the hotkey yet. Turn it "
+                            "on in System Settings › Privacy & Security › "
+                            "Input Monitoring, then quit and reopen "
+                            "WhisperTool.",
+    }
+
+    def _warn_permission(self, name):
+        """Any thread: queue a banner line for a permission that is off."""
+        print(f"[!] permission missing: {name}", flush=True)
+        if name not in self._perm_missing:
+            self._perm_missing.append(name)
+            self._pending_perm = True
+
+    def _mic_answer(self, ok):
+        print(f"[i] mic granted: {ok}", flush=True)
+        if not ok:
+            self._warn_permission("Microphone")
+
+    def _check_listener(self):
+        # Without Input Monitoring macOS refuses pynput's event tap and the
+        # listener thread just ends: ask for it and say where to turn it on.
+        if self.listener is not None and not self.listener.is_alive():
+            try:
+                from Quartz import CGRequestListenEventAccess
+                CGRequestListenEventAccess()
+            except Exception:
+                pass
+            self._warn_permission("Input Monitoring")
+
+    def _show_window(self):
+        self.root.deiconify()
+        self.root.lift()
+        if NSApplication is not None:
+            try:
+                NSApplication.sharedApplication() \
+                    .activateIgnoringOtherApps_(True)
             except Exception:
                 pass
 
@@ -1368,8 +1504,16 @@ class App:
                 "recording": ("#ef4444", "Recording..."),
                 "transcribing": ("#f59e0b", "Transcribing..."),
                 "polishing": ("#8b5cf6", "AI polishing..."),
+                "error": ("#ef4444", "Couldn't download the speech model. "
+                          "Check your internet connection and reopen "
+                          "WhisperTool."),
             }
-            c, lbl = colours.get(st, ("#22c55e", "Ready"))
+            if isinstance(st, tuple):  # ("downloading", mb so far)
+                c, lbl = "#3b82f6", (
+                    f"Downloading the speech model (first run only, "
+                    f"{MLX_SIZE}): {st[1]:,.0f} MB so far...")
+            else:
+                c, lbl = colours.get(st, ("#22c55e", "Ready"))
             dot.create_oval(2, 2, 12, 12, fill=c, tags="dot")
             self.status_var.set(lbl)
 
@@ -1396,14 +1540,13 @@ class App:
                     os.unlink(SHOW_FLAG)
                 except OSError:
                     pass
-                self.root.deiconify()
-                self.root.lift()
-                if NSApplication is not None:
-                    try:
-                        NSApplication.sharedApplication() \
-                            .activateIgnoringOtherApps_(True)
-                    except Exception:
-                        pass
+                self._show_window()
+
+        if self._pending_perm:
+            self._pending_perm = False
+            self.perm_var.set("\n".join(
+                "⚠ " + self.PERM_HELP[p] for p in self._perm_missing))
+            self.perm_lbl.pack(anchor="w", padx=12, pady=(0, 8))
 
         self.overlay.tick()
         self.root.after(30, self._tick)
@@ -1412,7 +1555,8 @@ class App:
 
     def _on_close(self):
         self._save_ai_config()
-        self.listener.stop()
+        if self.listener is not None:
+            self.listener.stop()
         # Tear the mic stream down once, on the main thread, before exit — a
         # controlled close beats leaving it to PortAudio's atexit Pa_Terminate
         # (which is where the CoreAudio HAL teardown deadlocked).
@@ -1430,6 +1574,182 @@ class App:
         self.root.mainloop()
 
 
+# ── Selftest (packaged app, no human needed) ────────────────────────
+
+def selftest(out):
+    """`WhisperTool --selftest out.json`: checks the build end to end WITHOUT
+    the global hotkey, the microphone or any keystroke/paste, and writes
+    what it saw as JSON (tools/seguridad.py reads it):
+      1. every native piece imports (MLX + its Metal kernels on the GPU,
+         faster-whisper/CTranslate2/ONNX Runtime/PyAV, PortAudio, pynput,
+         pyobjc) — imported, never started;
+      2. config.json is written 0600 (in a temp folder, not the user's);
+      3. text_processor + email mode give the expected text;
+      4. if the GPU model is already cached, it transcribes English speech
+         made with `say` (no download of gigabytes just for a test);
+      5. first-run download path: fetches the small faster-whisper "tiny"
+         model (~75 MB) into a temp cache with the progress callback, and
+         transcribes the same audio with it on the CPU (the fallback path);
+      6. opens the real window (hooks off) and the capsule overlay for
+         WT_SELFTEST_HOLD seconds so they can be screenshotted, then closes.
+    """
+    global CONFIG_PATH, BEEP_START, BEEP_STOP, SHOW_FLAG
+    import importlib
+    import shutil
+    r = {"frozen": FROZEN, "data_dir": APP_DIR, "version": APP_VERSION}
+
+    def dump():
+        with open(out, "w") as f:
+            json.dump(r, f, indent=1, ensure_ascii=False)
+
+    def err(e):
+        return f"{type(e).__name__}: {e}"[:300]
+
+    tmp = tempfile.mkdtemp(prefix="whispertool-selftest-")
+    CONFIG_PATH = os.path.join(tmp, "config.json")
+    BEEP_START = os.path.join(tmp, "beep_start.wav")
+    BEEP_STOP = os.path.join(tmp, "beep_stop.wav")
+    SHOW_FLAG = os.path.join(tmp, ".show")
+
+    # 1. Native pieces
+    r["imports"] = {}
+    for mod in ("mlx.core", "mlx_whisper", "faster_whisper", "ctranslate2",
+                "onnxruntime", "av", "sounddevice", "pynput.keyboard",
+                "pyautogui", "pyperclip", "AppKit", "Quartz", "AVFoundation",
+                "HIServices", "huggingface_hub", "hf_xet", "certifi"):
+        try:
+            importlib.import_module(mod)
+            r["imports"][mod] = "ok"
+        except Exception as e:
+            r["imports"][mod] = err(e)
+    try:
+        import mlx.core as mx
+        r["mlx_gpu"] = {"device": str(mx.default_device()),
+                        "sum": float((mx.array([1.0, 2.0, 3.0]) * 2).sum())}
+    except Exception as e:
+        r["mlx_gpu"] = {"error": err(e)}
+    r["portaudio"] = sd.get_portaudio_version()[1]
+    dump()
+
+    # 2. Config file permissions
+    try:
+        cfg = load_config()
+        cfg["ai_api_keys"]["Gemini"] = "selftest-not-a-real-key"
+        save_config(cfg)
+        r["config"] = {"mode": oct(os.stat(CONFIG_PATH).st_mode & 0o777),
+                       "roundtrip": load_config() == cfg}
+    except Exception as e:
+        r["config"] = {"error": err(e)}
+
+    # 3. Text processing
+    sample = ("um so I want to meet at 2 actually 3 period "
+              "send it to John I mean Mike")
+    r["text_processor"] = {"in": sample, "out": process_text(sample)}
+    r["email_mode"] = list(detect_email_mode(
+        "Estoy escribiendo un email, hola Ana, nos vemos mañana"))
+    dump()
+
+    # 4-5. Speech made with `say`
+    phrase = "Hello, this is a quick test of the dictation tool."
+    aiff, wav = os.path.join(tmp, "say.aiff"), os.path.join(tmp, "say.wav")
+    subprocess.run(["/usr/bin/say", "-v", "Samantha", "-o", aiff, phrase],
+                   check=True, timeout=60)
+    subprocess.run(["/usr/bin/afconvert", "-f", "WAVE", "-d", "LEI16@16000",
+                    "-c", "1", aiff, wav], check=True, timeout=60)
+    with wave.open(wav) as wf:
+        audio = np.frombuffer(wf.readframes(wf.getnframes()),
+                              np.int16).astype(np.float32) / 32768.0
+    r["say"] = {"phrase": phrase, "secs": round(len(audio) / SAMPLE_RATE, 1)}
+    try:
+        from huggingface_hub import snapshot_download
+        snapshot_download(MLX_REPO, local_files_only=True)
+        cached = True
+    except Exception:
+        cached = False
+    if not cached:
+        r["mlx"] = {"skip": "modelo no en caché"}
+        # Step 6 must not download 1.6 GB either: the window opens without
+        # loading any model.
+        App._load_model = lambda self: setattr(self, "model", "skipped")
+    else:
+        try:
+            t = time.time()
+            res = mlx_whisper.transcribe(
+                audio, path_or_hf_repo=MLX_REPO, language=None,
+                temperature=0.0, condition_on_previous_text=False)
+            r["mlx"] = {"text": res["text"].strip(),
+                        "language": res.get("language"),
+                        "secs": round(time.time() - t, 1)}
+        except Exception as e:
+            r["mlx"] = {"error": err(e)}
+    dump()
+    try:
+        prog, t = [], time.time()
+        hf = os.path.join(tmp, "hf")
+        path = fetch_model("Systran/faster-whisper-tiny", prog.append,
+                           cache_dir=hf)
+        r["download"] = {"repo": "Systran/faster-whisper-tiny",
+                         "secs": round(time.time() - t, 1),
+                         "files": sorted(os.listdir(path)),
+                         "progress_calls": len(prog),
+                         "progress_mb": [round(x, 1) for x in
+                                         prog[::max(1, len(prog) // 8)]]
+                         + [round(prog[-1], 1)] if prog else []}
+        m = WhisperModel(path, device="cpu", compute_type="int8")
+        t = time.time()
+        segs, info = m.transcribe(audio, beam_size=1, vad_filter=True,
+                                  language=None, temperature=0.0,
+                                  condition_on_previous_text=False)
+        r["cpu"] = {"text": " ".join(x.text for x in segs).strip(),
+                    "language": info.language,
+                    "secs": round(time.time() - t, 1)}
+    except Exception as e:
+        r["download"] = r.get("download") or {"error": err(e)}
+        r["cpu"] = {"error": err(e)}
+    dump()
+
+    # 6. The real window + overlay, hooks off
+    hold = float(os.environ.get("WT_SELFTEST_HOLD", "0"))
+    app = App(hooks=False)
+    t0 = time.time()
+
+    def windows():
+        return [{"title": str(w.title()), "number": int(w.windowNumber()),
+                 "visible": bool(w.isVisible())}
+                for w in NSApplication.sharedApplication().windows()]
+
+    def close():
+        r["ui"]["status_at_close"] = app.status_var.get()
+        r["ui"]["overlay_visible"] = bool(
+            app.overlay._panel is not None and app.overlay._panel.isVisible())
+        r["ui"]["windows"] = windows()
+        dump()
+        app._on_close()
+
+    def probe():
+        if app.model is None and time.time() - t0 < 120:
+            app.root.after(300, probe)
+            return
+        app.overlay.request_loading()
+        r["ui"] = {"model": app.model if isinstance(app.model, str)
+                   else type(app.model).__name__,
+                   "load_secs": round(time.time() - t0, 1),
+                   "title": app.root.title(), "windows": windows()}
+        dump()
+        app.root.after(int(hold * 1000) + 400, close)
+
+    app.root.after(300, probe)
+    app.run()
+    r["ui"]["closed"] = True
+    dump()
+    shutil.rmtree(tmp, ignore_errors=True)
+
+
 if __name__ == "__main__":
+    if "--selftest" in sys.argv:
+        i = sys.argv.index("--selftest")
+        selftest(sys.argv[i + 1] if len(sys.argv) > i + 1 else os.path.join(
+            tempfile.gettempdir(), "whispertool-selftest.json"))
+        sys.exit(0)
     app = App()
     app.run()

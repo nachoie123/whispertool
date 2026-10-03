@@ -16,5 +16,6 @@
     "OpenAI": "",
     "Claude": ""
   },
+  "vocabulary": "",
   "ai_style": "Just clean up my dictation: fix grammar and punctuation, and remove repetitions and self-corrections, keeping only the corrected version. Keep my language (Spanish stays Spanish), my casual tone, and roughly my own wording and length. Never add new content, greetings, sign-offs, or flourishes."
 }

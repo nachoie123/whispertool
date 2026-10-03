@@ -12,6 +12,7 @@ env/
 build/
 dist/
 *.spec
+!WhisperTool.spec
 
 # App-generated / runtime
 config.json

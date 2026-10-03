@@ -32,10 +32,15 @@ Email, chat, notes, code — anywhere you can type, you can talk instead. Transc
 
 ## Requirements & permissions
 
-- macOS on Apple Silicon, Python 3.12.
-- The app asks for two macOS permissions on first run:
+- A Mac with Apple Silicon (M1 or later) on macOS 14 or newer. From source: Python 3.12.
+- The app asks for these macOS permissions on first run:
   - **Microphone** — to hear you.
-  - **Accessibility** — to detect the global hotkey and paste the text.
+  - **Accessibility** — to paste the text where your cursor is.
+  - **Input Monitoring** — only if macOS asks for it, so the global hotkey can be heard.
+
+## Mac app
+
+Download `WhisperTool.dmg` from [Releases](https://github.com/nachoie123/whispertool/releases/latest). It isn't notarized by Apple: the first time, click *Done*, then *System Settings › Privacy & Security › Open Anyway*. The first launch downloads the speech model (~1.6 GB) once. Build it yourself with `./build.sh && tools/dmg.sh`; the security check of the bundle is in [tools/seguridad.md](tools/seguridad.md).
 
 That's normal for a dictation tool, but worth knowing before you install.
 
