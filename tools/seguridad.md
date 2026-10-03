@@ -1,6 +1,6 @@
 # Chequeo de seguridad de WhisperTool.app
 
-Generado por `tools/seguridad.py` el 2026-10-03 19:49 sobre `dist/WhisperTool.app` (605 MB descomprimidos, 3476 ficheros revisados).
+Generado por `tools/seguridad.py` el 2026-10-03 19:53 sobre `dist/WhisperTool.app` (605 MB descomprimidos, 3476 ficheros revisados).
 Todo lo de abajo es salida real de este script, no texto escrito a mano.
 
 | Prueba | Resultado |
@@ -82,8 +82,8 @@ Firma: Identifier=com.nachosanbenito.whispertool · Signature=adhoc · TeamIdent
 - Texto: «um so I want to meet at 2 actually 3 period send it to John I mean Mike» → «So I want to meet at 3. send it to Mike»
 - Modo email: [True, 'hola Ana, nos vemos mañana']
 - Audio de `say`: {'phrase': 'Hello, this is a quick test of the dictation tool.', 'secs': 2.9}
-- GPU (MLX large-v3-turbo): {'text': 'Hello, this is a quick test of the dictation tool', 'language': 'en', 'secs': 2.4}
-- Descarga (caché temporal, modelo pequeño): {'repo': 'Systran/faster-whisper-tiny', 'secs': 9.0, 'files': ['.gitattributes', 'README.md', 'config.json', 'model.bin', 'tokenizer.json', 'vocabulary.txt'], 'progress_calls': 80, 'progress_mb': [0.0, 8.1, 18.9, 26.8, 37.1, 47.9, 58.5, 69.2, 78.2]}
-- CPU (faster-whisper tiny): {'text': 'Hello, this is a quick test of the dictation tool.', 'language': 'en', 'secs': 0.4}
-- Ventana: {"model": "mlx", "load_secs": 1.8, "title": "WhisperTool v1.0.0 (by FuturMinds)", "windows": [{"title": "WhisperTool v1.0.0 (by FuturMinds)", "number": 29962, "visible": true}, {"title": "", "number": 29963, "visible": true}], "status_at_close": "Ready", "overlay_visible": true, "closed": true}
+- GPU (MLX large-v3-turbo): {'text': 'Hello, this is a quick test of the dictation tool', 'language': 'en', 'secs': 2.6}
+- Descarga (caché temporal, modelo pequeño): {'repo': 'Systran/faster-whisper-tiny', 'secs': 9.0, 'files': ['.gitattributes', 'README.md', 'config.json', 'model.bin', 'tokenizer.json', 'vocabulary.txt'], 'progress_calls': 81, 'progress_mb': [0.0, 8.2, 18.1, 26.0, 36.4, 47.2, 57.9, 68.7, 78.2, 78.2]}
+- CPU (faster-whisper tiny): {'text': 'Hello, this is a quick test of the dictation tool.', 'language': 'en', 'secs': 0.3}
+- Ventana: {"model": "mlx", "load_secs": 1.8, "title": "WhisperTool v1.0.0 (by FuturMinds)", "windows": [{"title": "Consola", "number": -1, "visible": false}, {"title": "WhisperTool v1.0.0 (by FuturMinds)", "number": 30020, "visible": true}, {"title": "", "number": 30021, "visible": true}], "status_at_close": "Ready", "overlay_visible": true, "closed": true}
 - Capturas: {'ventana': 'build/captura-ventana.png', 'capsula': 'build/captura-capsula.png'}
