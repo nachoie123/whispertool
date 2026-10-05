@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>WhisperTool</title>
-<meta name="description" content="Free, local voice-to-text for Mac. Hold a key, talk, let go — it types at your cursor, in any app.">
+<meta name="description" content="Free voice-to-text for Mac that lives in the menu bar. Hold a key, talk, let go — it types at your cursor, in any app.">
 <meta property="og:title" content="WhisperTool — talk instead of typing">
-<meta property="og:description" content="Free, open-source voice-to-text for Mac. Runs on your Mac's own chip: no cloud, no account. 11 s of talking typed in 1.8 s.">
+<meta property="og:description" content="Free, open-source voice-to-text for Mac. A 1 MB native menu-bar app: 23 MB of memory, 0% CPU when idle, live text while you talk.">
 <meta property="og:image" content="https://nachosanbenito.com/whispertool/og.jpg">
 <link rel="icon" href="icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -95,6 +95,9 @@
   .iwhy summary{cursor:pointer;color:var(--it);font-weight:600;font-size:15px;min-height:32px}
   .iwhy summary:focus-visible{outline:2px solid var(--ia);outline-offset:3px;border-radius:6px}
   .small a{color:inherit}
+  .island{margin:8px auto 34px;max-width:520px;text-align:center}
+  .island img{width:100%;height:auto;display:block}
+  .island figcaption{font-size:14px;color:var(--mute,#6b6457);margin-top:6px}
 </style>
 </head>
 <body>
@@ -103,39 +106,41 @@
     <div>
       <div class="brand"><img src="icon.png" alt=""><span>Whisper<b>Tool</b></span></div>
       <h1>You talk 3× faster than you <em>type.</em></h1>
-      <p class="lead">Hold <kbd>⌥ option</kbd> + <kbd>⌃ control</kbd>, talk, let go. WhisperTool transcribes on your Mac and types the text right at your cursor, in any app. Free and open source.</p>
+      <p class="lead">Hold <kbd>⌥ option</kbd> + <kbd>⌃ control</kbd>, talk, let go. You see your words as you say them, and WhisperTool types the text right at your cursor, in any app. Free and open source.</p>
       <div class="cta">
         <a class="btn main" href="https://github.com/nachoie123/whispertool/releases/latest/download/WhisperTool.dmg">⬇ Download for Mac</a>
       </div>
-      <p class="small">Free &amp; open source · Apple Silicon (M1 or later) · 174 MB · macOS 14+ · <a href="https://github.com/nachoie123/whispertool">Source on GitHub</a> · <a href="#install">How to install</a></p>
+      <p class="small">Free &amp; open source · Apple Silicon (M1 or later) · 1 MB · macOS 14+ · <a href="https://github.com/nachoie123/whispertool">Source on GitHub</a> · <a href="#install">How to install</a></p>
     </div>
     <div class="video"><video src="whispertool-promo.mp4" poster="poster.jpg" controls playsinline preload="metadata"></video></div>
   </section>
 
   <div class="stats">
-    <div class="stat"><b>1.8 s</b><span>to type out 11 s of talking (M4, large-v3-turbo on the GPU)</span></div>
-    <div class="stat"><b>0</b><span>accounts, servers or audio uploads</span></div>
+    <div class="stat"><b>23 MB</b><span>of memory and 0% CPU while it waits (version 1 kept 2.6 GB loaded all day)</span></div>
+    <div class="stat"><b>0.3 s</b><span>to transcribe a phrase with Whisper large-v3-turbo on Groq</span></div>
     <div class="stat"><b>EN · ES</b><span>language detected per phrase, mid-thought</span></div>
   </div>
 
+  <figure class="island"><img src="island.png" alt="A black island drops from the notch showing the words as you say them" width="520" height="110"><figcaption>While you hold the keys, a black island drops from the notch and shows what you're saying.</figcaption></figure>
+
   <h2>What it <em>does</em></h2>
   <div class="grid">
-    <div class="card"><b>Hold to talk</b><p>Hold <kbd>⌥</kbd>+<kbd>⌃</kbd>, speak, release. A beep tells you when it's listening and when it's done.</p></div>
+    <div class="card"><b>Hold to talk</b><p>Hold <kbd>⌥</kbd>+<kbd>⌃</kbd>, speak, release. A beep tells you when it's listening. The microphone is only on while you hold.</p></div>
     <div class="card"><b>Any app</b><p>Mail, Slack, Notion, your code editor — even apps in full screen. The text lands where your cursor is.</p></div>
-    <div class="card"><b>Ums are gone</b><p>Removes fillers, handles self-corrections, dictated punctuation and numbered lists.</p></div>
-    <div class="card"><b>Fast on your chip</b><p>GPU transcription with mlx-whisper (large-v3-turbo), with a CPU fallback.</p></div>
+    <div class="card"><b>Live text</b><p>See your words while you talk. If the internet fails, it pastes what your Mac heard; if everything fails, the audio is kept for a retry.</p></div>
+    <div class="card"><b>Lives in the menu bar</b><p>No Dock icon, no window. It opens at login, and recent dictations are one click away.</p></div>
     <div class="card"><b>Two languages</b><p>Spanish stays Spanish, English stays English, switched per phrase automatically.</p></div>
-    <div class="card"><b>Optional AI polish</b><p>Add your own free Gemini key and an AI pass tidies grammar — and can format a dictated email.</p></div>
+    <div class="card"><b>Optional AI polish</b><p>With your free Groq key, an AI pass removes ums and self-corrections, fixes punctuation, and can format a dictated email.</p></div>
   </div>
 
   <section class="dark">
-    <h2>Never leaves <em>your Mac.</em></h2>
-    <p>No cloud, no account. Your audio is transcribed locally and never uploaded. The optional AI polish sends only the transcribed text, and only if you turn it on with your own key.</p>
+    <h2>You choose where <em>it listens.</em></h2>
+    <p>Without a key, WhisperTool uses Apple's on-device speech recognition and nothing leaves your Mac. With your own free Groq key, the audio of each dictation goes to Groq's Whisper (large-v3-turbo) and the text comes back in about 0.3 s, then gets tidied. No account with me, no server of mine.</p>
   </section>
 
   <section class="install" id="install">
   <h2>Install on your Mac</h2>
-  <p class="isub">About a minute. Step 3 happens only the first time. The first launch also downloads the speech model (about 1.6 GB), once.</p>
+  <p class="isub">About a minute. Step 3 happens only the first time. For the best accuracy, paste a free key from <a href="https://console.groq.com/keys">console.groq.com</a> in Settings.</p>
   <ol class="isteps">
     <li>
       <div><b class="t">Drag it into Applications</b><p>Open <b>WhisperTool.dmg</b> and drag <b>WhisperTool</b> onto the <b>Applications</b> folder.</p></div>
@@ -149,14 +154,14 @@
       <div><b class="t">Open Anyway, once</b><p>Open <b>System Settings → Privacy &amp; Security</b>, scroll down to <b>Security</b> and click <b>Open Anyway</b> next to “WhisperTool” was blocked. Confirm with your password or Touch ID. From then on it opens with a double-click.</p></div>
       <div class="iart" aria-hidden="true"><div class="iwin iset"><div class="ihead">Privacy &amp; Security</div><div class="ilbl">Security</div><div class="irow"><span>“WhisperTool” was blocked to protect your Mac.</span><span class="ibtn on">Open Anyway</span></div></div></div>
     </li>
-  <li class="noart"><div><b class="t">Then: allow the microphone and talk</b><p>macOS asks for <b>Microphone</b> (to hear you) and <b>Accessibility</b> (to paste the text). If it also asks for <b>Input Monitoring</b>, allow it so the hotkey works, then reopen the app. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
+  <li class="noart"><div><b class="t">Then: allow the microphone and talk</b><p>macOS asks for <b>Microphone</b> (to hear you), <b>Speech Recognition</b> (for the live text) and <b>Accessibility</b> (for the hotkey and to paste). A waveform icon appears in the menu bar. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
   </ol>
   <div class="iwhy">
     <p><b>Why the warning?</b> Notarizing an app needs a paid Apple developer account ($99 a year). This is a free side project, so it isn't notarized. The full source code is on GitHub, and you can check that your download is exactly the file I built. In Terminal:</p>
-    <pre>shasum -a 256 ~/Downloads/WhisperTool.dmg</pre><p>should print <code>10b124ceb7fb620f05c57ef45ef09b52a5a85d4e43390102fbe41e688ade403b</code></p>
+    <pre>shasum -a 256 ~/Downloads/WhisperTool.dmg</pre><p>should print <code>c973ad91f580f1640c1efdbbb1c8c5c9e13aedabd0a035f5338f5fba403f6c11</code></p>
     <details><summary>Prefer the Terminal for step 3?</summary><pre>xattr -dr com.apple.quarantine "/Applications/WhisperTool.app"</pre></details>
   </div>
-  <p class="small" style="margin-top:14px">From source instead: <code>git clone https://github.com/nachoie123/whispertool.git &amp;&amp; cd whispertool &amp;&amp; pip3 install -r requirements.txt &amp;&amp; python3 main.py</code> (Python 3.12).</p>
+  <p class="small" style="margin-top:14px">From source instead: <code>git clone https://github.com/nachoie123/whispertool.git &amp;&amp; cd whispertool/mac &amp;&amp; ./build.sh</code> (needs Xcode's command line tools).</p>
   </section>
 
   <footer>Built by <a href="https://www.linkedin.com/in/nacho-san-benito/">Ignacio San Benito</a> · A Mac fork of <a href="https://github.com/futurminds/whispertool">WisprTool by FuturMinds</a>, full credit to them for the original.</footer>

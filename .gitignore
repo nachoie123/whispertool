@@ -33,3 +33,4 @@ Desktop.ini
 
 # local publish helper (not for the repo)
 PUBLICAR_EN_GITHUB.command
+mac/build/

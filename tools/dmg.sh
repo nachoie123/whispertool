@@ -1,5 +1,5 @@
 #!/bin/bash
-# dist/WhisperTool.app -> dist/WhisperTool.dmg: ventana con fondo (arrastrar a Applications + "Open Anyway").
+# mac/build/WhisperTool.app (mac/build.sh) -> dist/WhisperTool.dmg: ventana con fondo (arrastrar a Applications + "Open Anyway").
 # Después de ./build.sh. Mismo método que Guardados: bounds dos veces o el Finder no guarda el tamaño.
 # Colores de la landing (docs/index.html): crema #F4EEDD, tinta #16141a, violeta #5B47E0.
 set -e
@@ -24,15 +24,15 @@ lines = ["It says Apple could not verify \"WhisperTool\".",
          "Click \"Done\", then:",
          "System Settings  ›  Privacy & Security  ›",
          "scroll to the bottom  ›  \"Open Anyway\"  ›  confirm.", "",
-         "Only once. Then allow Microphone and Accessibility. Apple Silicon only."]
+         "Only once. Then allow Microphone, Speech Recognition and Accessibility."]
 for i, l in enumerate(lines):
     d.text((52*S, (y+58+i*20)*S), l, font=F(14, i in (4, 5)), fill=INK if i in (4, 5) else MUTE)
 im.save("build/bg@2x.png"); im.resize((W, H), Image.LANCZOS).save("build/bg.png")
 EOF
 tiffutil -cathidpicheck build/bg.png build/bg@2x.png -out $ST/.background/bg.tiff >/dev/null
-ditto dist/WhisperTool.app $ST/WhisperTool.app
+ditto mac/build/WhisperTool.app $ST/WhisperTool.app
 ln -s /Applications $ST/Applications
-# tamaño: lo que ocupa la app + margen (pesa ~500 MB)
+# tamaño: lo que ocupa la app + margen (la app nativa pesa ~2 MB)
 MB=$(( $(du -sm $ST | cut -f1) + 80 ))
 hdiutil create -srcfolder $ST -volname $VOL -fs HFS+ -format UDRW -size ${MB}m build/rw.dmg >/dev/null
 hdiutil attach build/rw.dmg -noautoopen -quiet; sleep 2

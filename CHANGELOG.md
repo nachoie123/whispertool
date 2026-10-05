@@ -6,6 +6,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ---
 
+## [2.0.0] - 2026-10-05
+
+### Changed
+- Mac app rewritten in Swift (`mac/WhisperTool.swift`): menu-bar app, 23 MB and 0% CPU while idle (v1: 2.6 GB).
+- Transcription with Whisper large-v3-turbo on Groq (own free key); Apple on-device recognition as fallback and as the no-key mode.
+- Microphone only on while the hotkey is held.
+
+### Added
+- Live text in a black island under the notch while you talk.
+- Recent dictations in the menu; the last audio is kept for a retry if transcription fails.
+- Opens at login; settings window with permissions status and a vocabulary hint for names.
+
+---
+
 ## [1.0.0] - 2026-02-17
 
 ### Added
