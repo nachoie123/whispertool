@@ -1,6 +1,6 @@
 #!/bin/bash
 # Compila WhisperTool.app (sin Xcode) y lo instala en /Applications.
-# Firma con el certificado de desarrollo (identificador estable): recompilar NO borra los permisos de micro/accesibilidad.
+# Firma con Developer ID + runtime endurecido (desde 11/10/2026): la identidad es estable, recompilar no borra permisos.
 set -e
 cd "$(dirname "$0")"
 APP=build/WhisperTool.app
@@ -16,8 +16,8 @@ cat > "$APP/Contents/Info.plist" <<PL
 <key>CFBundleExecutable</key><string>WhisperTool</string>
 <key>CFBundleIconFile</key><string>WhisperTool</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>2.0</string>
-<key>CFBundleVersion</key><string>2</string>
+<key>CFBundleShortVersionString</key><string>2.1</string>
+<key>CFBundleVersion</key><string>3</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
@@ -26,8 +26,8 @@ cat > "$APP/Contents/Info.plist" <<PL
 </dict></plist>
 PL
 cp icono/WhisperTool.icns sonidos/*.wav "$APP/Contents/Resources/"
-ID="${SIGN_ID:-Apple Development: nsanbenitop@icloud.com (9X6V6UWR7F)}"; security find-identity -v -p codesigning | grep -q "$ID" || ID=-   # sin ese certificado: firma ad-hoc
-codesign --force -s "$ID" --identifier com.nacho.whispertool "$APP"
+ID="${SIGN_ID:-Developer ID Application: Ignacio San Benito (4HBV76K3X6)}"; security find-identity -v -p codesigning | grep -q "$ID" || ID=-   # sin ese certificado: firma ad-hoc
+codesign --force --options runtime --timestamp --entitlements WhisperTool.entitlements -s "$ID" --identifier com.nacho.whispertool "$APP"
 pkill -x WhisperTool 2>/dev/null || true
 ditto "$APP" /Applications/WhisperTool.app
 echo "✅ /Applications/WhisperTool.app"

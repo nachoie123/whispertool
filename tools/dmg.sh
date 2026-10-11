@@ -18,15 +18,14 @@ d.polygon([(405*S, 135*S), (430*S, 150*S), (405*S, 165*S)], fill=V)
 d.text((W*S//2, 40*S), "1 · Drag WhisperTool into Applications", font=F(20, True), fill=INK, anchor="mm")
 y = 260
 d.rounded_rectangle([(30*S, y*S), (630*S, (y+235)*S)], radius=16*S, fill="#FBF8EF", outline=V, width=2*S)
-d.text((52*S, (y+22)*S), "2 · The first time, macOS stops it (that's normal)", font=F(18, True), fill=INK)
-lines = ["It says Apple could not verify \"WhisperTool\".",
-         "The app isn't notarized by Apple ($99/year), like most indie apps.", "",
-         "Click \"Done\", then:",
-         "System Settings  ›  Privacy & Security  ›",
-         "scroll to the bottom  ›  \"Open Anyway\"  ›  confirm.", "",
-         "Only once. Then allow Microphone, Speech Recognition and Accessibility."]
+d.text((52*S, (y+22)*S), "2 · Open it and allow the permissions", font=F(18, True), fill=INK)
+lines = ["Double-click it. Signed and notarized by Apple: no warnings.", "",
+         "The first time, macOS asks for three permissions:",
+         "Microphone  ·  Speech Recognition  ·  Accessibility",
+         "(Accessibility is what lets it paste the text for you.)", "",
+         "Hold  ⌃⌥  to dictate. Release to paste."]
 for i, l in enumerate(lines):
-    d.text((52*S, (y+58+i*20)*S), l, font=F(14, i in (4, 5)), fill=INK if i in (4, 5) else MUTE)
+    d.text((52*S, (y+58+i*20)*S), l, font=F(14, i in (2, 3)), fill=INK if i in (2, 3) else MUTE)
 im.save("build/bg@2x.png"); im.resize((W, H), Image.LANCZOS).save("build/bg.png")
 EOF
 tiffutil -cathidpicheck build/bg.png build/bg@2x.png -out $ST/.background/bg.tiff >/dev/null

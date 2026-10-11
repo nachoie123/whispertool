@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ---
 
+## [2.1.0] - 2026-10-11
+
+### Changed
+- Signed with Developer ID and notarized by Apple: no more "Open Anyway". The DMG background and the install page drop that step.
+- Hardened runtime with the microphone entitlement (`mac/WhisperTool.entitlements`).
+
 ## [2.0.0] - 2026-10-05
 
 ### Changed

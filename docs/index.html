@@ -370,26 +370,17 @@
 
   <section class="sec install" id="install" aria-labelledby="ti">
     <h2 id="ti" class="rv">Install on your Mac.</h2>
-    <p class="isub">About a minute. Step 3 happens only the first time. For the best accuracy, paste a free key from <a href="https://console.groq.com/keys">console.groq.com</a> in Settings.</p>
+    <p class="isub">About a minute. Step 2 happens only the first time. For the best accuracy, paste a free key from <a href="https://console.groq.com/keys">console.groq.com</a> in Settings.</p>
     <ol class="isteps">
       <li>
         <div><b class="t">Drag it into Applications</b><p>Open <b>WhisperTool.dmg</b> and drag <b>WhisperTool</b> onto the <b>Applications</b> folder.</p><p style="margin-top:14px"><a class="btn main" href="https://github.com/nachoie123/whispertool/releases/latest/download/WhisperTool.dmg">Download WhisperTool.dmg</a></p></div>
         <div class="iart" aria-hidden="true"><div class="iwin idrag"><div><img class="iicon" src="icon.png" alt=""><span>WhisperTool</span></div><div class="arr"></div><div><div class="ifold"></div><span>Applications</span></div></div></div>
       </li>
-      <li>
-        <div><b class="t">Open it. macOS stops it. Click Done.</b><p>macOS says Apple could not verify “WhisperTool” is free of malware. It says that about every app that isn't notarized by Apple. Click <b>Done</b>, not Move to Trash.</p></div>
-        <div class="iart" aria-hidden="true"><div class="iwin idlg"><img class="iicon" src="icon.png" alt=""><h4>“WhisperTool” Not Opened</h4><p>Apple could not verify “WhisperTool” is free of malware that may harm your Mac or compromise your privacy.</p><span class="ibtn on">Done</span><span class="ibtn">Move to Trash</span></div></div>
-      </li>
-      <li>
-        <div><b class="t">Open Anyway, once</b><p>Open <b>System Settings → Privacy &amp; Security</b>, scroll down to <b>Security</b> and click <b>Open Anyway</b> next to “WhisperTool” was blocked. Confirm with your password or Touch ID. From then on it opens with a double-click.</p></div>
-        <div class="iart" aria-hidden="true"><div class="iwin iset"><div class="ihead">Privacy &amp; Security</div><div class="ilbl">Security</div><div class="irow"><span>“WhisperTool” was blocked to protect your Mac.</span><span class="ibtn on">Open Anyway</span></div></div></div>
-      </li>
-      <li class="noart"><div><b class="t">Then: allow the microphone and talk</b><p>macOS asks for <b>Microphone</b> (to hear you), <b>Speech Recognition</b> (for the live text) and <b>Accessibility</b> (for the hotkey and to paste). A waveform icon appears in the menu bar. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
+      <li class="noart"><div><b class="t">Open it and allow the microphone</b><p>macOS asks for <b>Microphone</b> (to hear you), <b>Speech Recognition</b> (for the live text) and <b>Accessibility</b> (for the hotkey and to paste). A waveform icon appears in the menu bar. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
     </ol>
     <div class="iwhy">
-      <p><b>Why the warning?</b> Notarizing an app needs a paid Apple developer account ($99 a year). This is a free side project, so it isn't notarized. The full source code is on GitHub, and you can check that your download is exactly the file I built. In Terminal:</p>
-      <pre>shasum -a 256 ~/Downloads/WhisperTool.dmg</pre><p>should print <code>c973ad91f580f1640c1efdbbb1c8c5c9e13aedabd0a035f5338f5fba403f6c11</code></p>
-      <details><summary>Prefer the Terminal for step 3?</summary><pre>xattr -dr com.apple.quarantine "/Applications/WhisperTool.app"</pre></details>
+      <p><b>Signed and notarized by Apple</b> (Developer ID Ignacio San Benito), so it opens with a double-click, no warnings. The full source code is on GitHub, and you can check that your download is exactly the file I built. In Terminal:</p>
+      <pre>shasum -a 256 ~/Downloads/WhisperTool.dmg</pre><p>should print <code>f110f8dd21f8d13c26ce8585ecd2f9babc83cd8705af2617dc66589cda571138</code></p>
     </div>
     <div class="src">From source instead (needs Xcode's command line tools):<pre>git clone https://github.com/nachoie123/whispertool.git && cd whispertool/mac && ./build.sh</pre></div>
   </section>
