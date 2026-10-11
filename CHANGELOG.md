@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ### Changed
 - Signed with Developer ID and notarized by Apple: no more "Open Anyway". The DMG background and the install page drop that step.
+- One-click installer `WhisperTool.pkg` (signed Developer ID Installer, notarized): installs into Applications and launches the app.
 - Hardened runtime with the microphone entitlement (`mac/WhisperTool.entitlements`).
 
 ## [2.0.0] - 2026-10-05

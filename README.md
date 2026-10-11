@@ -37,7 +37,7 @@ Microphone (to hear you), Speech Recognition (live text) and Accessibility (the 
 
 ## Mac app
 
-Download `WhisperTool.dmg` from [Releases](https://github.com/nachoie123/whispertool/releases/latest). Signed with Developer ID and notarized by Apple since v2.1: it opens with a double-click. To build the DMG yourself: `mac/build.sh && tools/dmg.sh`.
+Download `WhisperTool.pkg` from [Releases](https://github.com/nachoie123/whispertool/releases/latest). Signed with Developer ID and notarized by Apple since v2.1: the installer puts it in Applications and opens it. (`WhisperTool.dmg` is still there for drag-and-drop.) To build it yourself: `mac/build.sh`, then `sellar.sh pkg` (see CHANGELOG).
 
 ## Version 1 (Python, cross-platform)
 

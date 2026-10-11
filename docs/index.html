@@ -373,14 +373,13 @@
     <p class="isub">About a minute. Step 2 happens only the first time. For the best accuracy, paste a free key from <a href="https://console.groq.com/keys">console.groq.com</a> in Settings.</p>
     <ol class="isteps">
       <li>
-        <div><b class="t">Drag it into Applications</b><p>Open <b>WhisperTool.dmg</b> and drag <b>WhisperTool</b> onto the <b>Applications</b> folder.</p><p style="margin-top:14px"><a class="btn main" href="https://github.com/nachoie123/whispertool/releases/latest/download/WhisperTool.dmg">Download WhisperTool.dmg</a></p></div>
-        <div class="iart" aria-hidden="true"><div class="iwin idrag"><div><img class="iicon" src="icon.png" alt=""><span>WhisperTool</span></div><div class="arr"></div><div><div class="ifold"></div><span>Applications</span></div></div></div>
+        <div><b class="t">Download and install</b><p>Open <b>WhisperTool.pkg</b> and click <b>Install</b>. It goes into Applications and opens by itself.</p><p style="margin-top:14px"><a class="btn main" href="https://github.com/nachoie123/whispertool/releases/latest/download/WhisperTool.pkg">Download WhisperTool.pkg</a></p></div>
       </li>
       <li class="noart"><div><b class="t">Open it and allow the microphone</b><p>macOS asks for <b>Microphone</b> (to hear you), <b>Speech Recognition</b> (for the live text) and <b>Accessibility</b> (for the hotkey and to paste). A waveform icon appears in the menu bar. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
     </ol>
     <div class="iwhy">
       <p><b>Signed and notarized by Apple</b> (Developer ID Ignacio San Benito), so it opens with a double-click, no warnings. The full source code is on GitHub, and you can check that your download is exactly the file I built. In Terminal:</p>
-      <pre>shasum -a 256 ~/Downloads/WhisperTool.dmg</pre><p>should print <code>f110f8dd21f8d13c26ce8585ecd2f9babc83cd8705af2617dc66589cda571138</code></p>
+      <pre>shasum -a 256 ~/Downloads/WhisperTool.pkg</pre><p>should print <code>55bd9b7662d497ef21f171dea8204a6f6e532233c3c712c2e96698cc98b48467</code></p>
     </div>
     <div class="src">From source instead (needs Xcode's command line tools):<pre>git clone https://github.com/nachoie123/whispertool.git && cd whispertool/mac && ./build.sh</pre></div>
   </section>
