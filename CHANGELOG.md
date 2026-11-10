@@ -6,6 +6,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ---
 
+## [2.2.0] - 2026-11-10
+
+### Fixed
+- Runs on macOS 14 or later. v2.1 was compiled without a deployment target, so the binary asked for macOS 26 even though `Info.plist` said 14. `mac/build.sh` now passes `-target arm64-apple-macos14.0` (check: `vtool -show-build` prints `minos 14.0`). No code changes.
+
 ## [2.1.0] - 2026-10-11
 
 ### Changed

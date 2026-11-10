@@ -5,7 +5,8 @@ set -e
 cd "$(dirname "$0")"
 APP=build/WhisperTool.app
 rm -rf "$APP"; mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-swiftc -O -swift-version 5 -parse-as-library -o "$APP/Contents/MacOS/WhisperTool" WhisperTool.swift
+# -target fija el macOS mínimo real del binario (sin él sale el del Mac que compila: macOS 26). Debe coincidir con LSMinimumSystemVersion.
+swiftc -O -swift-version 5 -parse-as-library -target arm64-apple-macos14.0 -o "$APP/Contents/MacOS/WhisperTool" WhisperTool.swift
 cat > "$APP/Contents/Info.plist" <<PL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -16,8 +17,8 @@ cat > "$APP/Contents/Info.plist" <<PL
 <key>CFBundleExecutable</key><string>WhisperTool</string>
 <key>CFBundleIconFile</key><string>WhisperTool</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>2.1</string>
-<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>2.2</string>
+<key>CFBundleVersion</key><string>4</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
