@@ -320,7 +320,7 @@
         <div><dt>23 MB</dt><dd>of memory and 0% CPU while it waits. Version 1 kept 2.6 GB loaded all day.</dd></div>
         <div><dt>0.3 s</dt><dd>to transcribe a phrase with Whisper large-v3-turbo on Groq.</dd></div>
         <div><dt>EN + ES</dt><dd>language detected per phrase, mid-thought.</dd></div>
-        <div><dt>1 MB</dt><dd>native app for Apple Silicon (M1 or later), macOS 14 or later. Free and open source.</dd></div>
+        <div><dt>4 MB</dt><dd>native app for Apple Silicon (M1 or later), macOS 14 or later. Free and open source.</dd></div>
       </dl>
     </div>
     <figure class="player rv">
@@ -373,15 +373,15 @@
     <p class="isub">About a minute. Step 2 happens only the first time. For the best accuracy, paste a free key from <a href="https://console.groq.com/keys">console.groq.com</a> in Settings.</p>
     <ol class="isteps">
       <li>
-        <div><b class="t">Download and install</b><p>Open <b>WhisperTool.pkg</b> and click <b>Install</b>. It goes into Applications and opens by itself.</p><p style="margin-top:14px"><a class="btn main" href="https://github.com/nachoie123/whispertool/releases/latest/download/WhisperTool.pkg">Download WhisperTool.pkg</a></p></div>
+        <div><b class="t">Download and install</b><p>Open <b>WhisperTool.pkg</b> and click <b>Install</b>. It goes into Applications and opens by itself. From then on it updates itself.</p><p style="margin-top:14px"><a class="btn main" href="https://github.com/nachoie123/whispertool/releases/latest/download/WhisperTool.pkg">Download WhisperTool.pkg</a></p></div>
       </li>
       <li class="noart"><div><b class="t">Open it and allow the microphone</b><p>macOS asks for <b>Microphone</b> (to hear you), <b>Speech Recognition</b> (for the live text) and <b>Accessibility</b> (for the hotkey and to paste). A waveform icon appears in the menu bar. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
     </ol>
     <div class="iwhy">
       <p><b>Signed and notarized by Apple</b> (Developer ID Ignacio San Benito), so it opens with a double-click, no warnings. The full source code is on GitHub, and you can check that your download is exactly the file I built. In Terminal:</p>
-      <pre>shasum -a 256 ~/Downloads/WhisperTool.pkg</pre><p>should print <code>7d6bb09f4f8c650d7ec69be2ca0f3c7f60144e23d0a9224cf96ff9b2b18e5b4b</code></p>
+      <pre>shasum -a 256 ~/Downloads/WhisperTool.pkg</pre><p>should print <code>75a3502eff656efe6048adb9853ec5e5608fb11c2e00793c3aa9e815ce3d0386</code> (version <span class="ver">2.3</span>).</p>
     </div>
-    <div class="src">From source instead (needs Xcode's command line tools):<pre>git clone https://github.com/nachoie123/whispertool.git && cd whispertool/mac && ./build.sh</pre></div>
+    <div class="src">From source instead (needs Xcode's command line tools):<pre>git clone https://github.com/nachoie123/whispertool.git && cd whispertool/mac && ./build.sh instalar</pre></div>
   </section>
 
   <footer>

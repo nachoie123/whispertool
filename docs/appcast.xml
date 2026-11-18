@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+ <channel>
+  <title>WhisperTool</title>
+  <item>
+   <title>WhisperTool 2.3</title>
+   <pubDate>Wed, 18 Nov 2026 13:14:43 GMT</pubDate>
+   <sparkle:version>6</sparkle:version>
+   <sparkle:shortVersionString>2.3</sparkle:shortVersionString>
+   <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+   <description><![CDATA[<ul><li>Ya no hace falta descargar la app a mano: cada día busca si hay una versión nueva.</li><li>Si la encuentra, la descarga sola y se instala la próxima vez que cierres WhisperTool.</li><li>Si quieres comprobarlo ya, usa el menú «Buscar actualizaciones…».</li></ul>]]></description>
+   <enclosure url="https://github.com/nachoie123/whispertool/releases/download/v2.3/WhisperTool-2.3.zip" sparkle:edSignature="uPD9KJAUT1MhfXTlQtv4X6AX5KzA2niL1sDyOf/t+ZtWQW3YaC84KVM8c1XBdgVxf5LhiMXn0tUpYSimaeA7Dg==" length="1972821" type="application/octet-stream"/>
+  </item>
+ </channel>
+</rss>

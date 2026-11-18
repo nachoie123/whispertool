@@ -6,6 +6,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ---
 
+## [2.3] - 2026-11-18
+
+- Ya no hace falta descargar la app a mano: cada día busca si hay una versión nueva.
+- Si la encuentra, la descarga sola y se instala la próxima vez que cierres WhisperTool.
+- Si quieres comprobarlo ya, usa el menú «Buscar actualizaciones…».
+
 ## [2.2.0] - 2026-11-10
 
 ### Fixed
