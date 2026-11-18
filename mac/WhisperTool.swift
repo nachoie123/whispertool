@@ -8,6 +8,7 @@ import AVFoundation
 import Speech
 import ServiceManagement
 import ApplicationServices
+import Sparkle
 
 // Datos en Application Support; si existe la carpeta de la versión Python (~/whispertool/config.json), se sigue usando esa
 let carpeta: URL = {
@@ -66,7 +67,7 @@ final class Ajustes: ObservableObject {
     @Published var clave = "" { didSet { guardar() } }
     @Published var estilo = "" { didSet { guardar() } }
     @Published var textoEnVivo = true { didSet { guardar() } }
-    // Pistas de vocabulario para Whisper: nombres propios que dices a menudo (sin ellas «Nacho» salía «NATO»)
+    // Pistas de vocabulario para Whisper: nombres propios que dices a menudo (sin ellas un nombre poco común sale mal escrito)
     @Published var vocabulario = "" { didSet { guardar() } }
     private var cargando = true
 
@@ -604,6 +605,8 @@ final class Barra: NSObject, NSMenuDelegate {
     static let shared = Barra()
     private var item: NSStatusItem!
     private var ventana: NSWindow?
+    // Sparkle: mira el appcast una vez al día, descarga sola la versión nueva y la instala al salir
+    let actualizador = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
     func instalar() {
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -649,6 +652,9 @@ final class Barra: NSObject, NSMenuDelegate {
         menu.addItem(interruptor("Texto en vivo", a.textoEnVivo, #selector(cambiarVivo)))
         menu.addItem(interruptor("Abrir al iniciar sesión", SMAppService.mainApp.status == .enabled, #selector(cambiarInicio)))
         menu.addItem(.separator())
+        let act = NSMenuItem(title: "Buscar actualizaciones…", action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
+        act.target = actualizador
+        menu.addItem(act)
         let aj = accion("Ajustes…", #selector(abrirAjustes))
         aj.keyEquivalent = ","
         menu.addItem(aj)
