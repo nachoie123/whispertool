@@ -579,9 +579,14 @@ final class Dictador {
 
 @MainActor
 enum Atajo {
+    nonisolated(unsafe) static var monitores: [Any] = []
+    /// También al encenderse Accesibilidad: un monitor puesto antes del permiso puede no oír nunca las teclas
     static func instalar() {
-        NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { e in MainActor.assumeIsolated { manejar(e) } }
-        NSEvent.addLocalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { e in MainActor.assumeIsolated { manejar(e) }; return e }
+        monitores.forEach(NSEvent.removeMonitor)
+        monitores = [
+            NSEvent.addGlobalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { e in MainActor.assumeIsolated { manejar(e) } },
+            NSEvent.addLocalMonitorForEvents(matching: [.flagsChanged, .keyDown]) { e in MainActor.assumeIsolated { manejar(e) }; return e },
+        ].compactMap { $0 }
     }
 
     static func manejar(_ e: NSEvent) {
@@ -732,6 +737,16 @@ struct AjustesVista: View {
                 }
                 .padding(.vertical, 4)
             }
+            // primero: sin estos tres el atajo no hace nada (un usuario nuevo los ve sin bajar)
+            Section {
+                permiso("Micrófono", mic, "Privacy_Microphone")
+                permiso("Reconocimiento de voz (texto en vivo)", voz, "Privacy_SpeechRecognition")
+                permiso("Accesibilidad (atajo y pegar)", acc, "Privacy_Accessibility")
+            } header: {
+                Text("Permisos")
+            } footer: {
+                if !(mic && acc) { Text("Actívalos y vuelve aquí: WhisperTool se pone en verde sola.").font(.caption) }
+            }
             Section("Pulido con IA") {
                 Toggle("Limpiar muletillas, repeticiones y puntuación", isOn: $a.pulir)
                 SecureField("Clave de Groq", text: $a.clave, prompt: Text("gsk_…  (gratis en console.groq.com)"))
@@ -751,11 +766,6 @@ struct AjustesVista: View {
                 Toggle("Abrir al iniciar sesión", isOn: $inicio)
                     .onChange(of: inicio) { _, v in Inicio.cambiar(v) }
             }
-            Section("Permisos") {
-                permiso("Micrófono", mic, "Privacy_Microphone")
-                permiso("Reconocimiento de voz (texto en vivo)", voz, "Privacy_SpeechRecognition")
-                permiso("Accesibilidad (atajo y pegar)", acc, "Privacy_Accessibility")
-            }
             if !h.items.isEmpty {
                 Section("Recientes") {
                     ForEach(h.items.prefix(8)) { d in
@@ -772,6 +782,15 @@ struct AjustesVista: View {
         }
         .formStyle(.grouped)
         .frame(width: 480, height: 620)
+        // Accesibilidad se enciende en Ajustes del Sistema: al verla, WhisperTool vuelve delante y se pone en verde
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if !acc && AXIsProcessTrusted() {
+                acc = true
+                Atajo.instalar()
+                NSApp.activate(ignoringOtherApps: true)
+                NSApp.windows.first { $0.title == "WhisperTool" }?.makeKeyAndOrderFront(nil)
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             mic = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
             voz = SFSpeechRecognizer.authorizationStatus() == .authorized
@@ -785,10 +804,26 @@ struct AjustesVista: View {
             Spacer()
             if ok { Label("Activado", systemImage: "checkmark.circle.fill").foregroundStyle(.green).labelStyle(.titleAndIcon) }
             else {
-                Button("Activar…") {
-                    NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?\(panel)")!)
-                }
+                Button("Activar…") { Permisos.pedir(panel) }
             }
+        }
+    }
+}
+
+/// Pide un permiso: el aviso de macOS si aún no se ha preguntado; si ya se dijo que no, su página de Ajustes.
+enum Permisos {
+    static func pedir(_ panel: String) {
+        let ajustes = { _ = NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?\(panel)")!) }
+        switch panel {
+        case "Privacy_Microphone" where AVCaptureDevice.authorizationStatus(for: .audio) == .notDetermined:
+            AVCaptureDevice.requestAccess(for: .audio) { _ in DispatchQueue.main.async { NSApp.activate(ignoringOtherApps: true) } }
+        case "Privacy_SpeechRecognition" where SFSpeechRecognizer.authorizationStatus() == .notDetermined:
+            SFSpeechRecognizer.requestAuthorization { _ in DispatchQueue.main.async { NSApp.activate(ignoringOtherApps: true) } }
+        case "Privacy_Accessibility" where !UserDefaults.standard.bool(forKey: "accesibilidadPedida"):
+            // la primera vez, el aviso de macOS: añade WhisperTool a la lista y su botón abre la página justa
+            UserDefaults.standard.set(true, forKey: "accesibilidadPedida")
+            _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
+        default: ajustes()
         }
     }
 }
@@ -811,11 +846,12 @@ final class Delegado: NSObject, NSApplicationDelegate {
         MainActor.assumeIsolated {
             Barra.shared.instalar()
             Atajo.instalar()
-            AVCaptureDevice.requestAccess(for: .audio) { _ in }
-            SFSpeechRecognizer.requestAuthorization { _ in }
-            // Pide Accesibilidad (sin ella no hay atajo global ni ⌘V)
-            let op = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-            _ = AXIsProcessTrustedWithOptions(op)
+            // falta algún permiso (la primera vez, siempre): la ventana con los permisos delante, y los avisos
+            // de macOS salen encima de ella, con contexto, en vez de sueltos sobre el escritorio
+            // y cada aviso sale al pulsar su «Activar…», de uno en uno (antes salían tres a la vez al abrir)
+            if AVCaptureDevice.authorizationStatus(for: .audio) != .authorized || !AXIsProcessTrusted() {
+                Barra.shared.abrirAjustes()
+            }
             // primera vez: que arranque solo al iniciar sesión, como Macs Fan Control
             if !UserDefaults.standard.bool(forKey: "inicioConfigurado") {
                 Inicio.cambiar(true)

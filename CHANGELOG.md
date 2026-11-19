@@ -6,6 +6,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ---
 
+## [2.4] - 2026-11-19
+
+- Al abrirla por primera vez sale una ventana con tres botones, uno por permiso: micrófono, dictado y accesibilidad.
+- Cada botón pide su permiso; cuando los tres están en verde, ya puedes dictar.
+- Ya no salen tres avisos de golpe al abrirla.
+- El instalador va directo: sin pantalla de elegir disco.
+
 ## [2.3] - 2026-11-18
 
 - Ya no hace falta descargar la app a mano: cada día busca si hay una versión nueva.

@@ -5,7 +5,7 @@
 # Firma con Developer ID + runtime endurecido (desde 11/10/2026): la identidad es estable, recompilar no borra permisos.
 set -e
 cd "$(dirname "$0")"
-VERSION=2.3; BUILD=6    # las sube el trabajo semanal de actualizaciones
+VERSION=2.4; BUILD=7    # las sube el trabajo semanal de actualizaciones
 APP=build/WhisperTool.app
 SPARKLE=build/sparkle   # Sparkle 2.10.1 oficial; se descarga la primera vez
 [ -d "$SPARKLE/Sparkle.framework" ] || { mkdir -p "$SPARKLE"

@@ -3,6 +3,15 @@
  <channel>
   <title>WhisperTool</title>
   <item>
+   <title>WhisperTool 2.4</title>
+   <pubDate>Thu, 19 Nov 2026 09:14:07 GMT</pubDate>
+   <sparkle:version>7</sparkle:version>
+   <sparkle:shortVersionString>2.4</sparkle:shortVersionString>
+   <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+   <description><![CDATA[<ul><li>Al abrirla por primera vez sale una ventana con tres botones, uno por permiso: micrófono, dictado y accesibilidad.</li><li>Cada botón pide su permiso; cuando los tres están en verde, ya puedes dictar.</li><li>Ya no salen tres avisos de golpe al abrirla.</li><li>El instalador va directo: sin pantalla de elegir disco.</li></ul>]]></description>
+   <enclosure url="https://github.com/nachoie123/whispertool/releases/download/v2.4/WhisperTool-2.4.zip" sparkle:edSignature="vPYm5gz8/eQm3h0HeddGMhJ7P+ZbtmHUE3qkiGAetzHCWCsgtOFwBo0PYwqBPcfzACuuiCxhJHXaoBuBMKznBg==" length="1977383" type="application/octet-stream"/>
+  </item>
+  <item>
    <title>WhisperTool 2.3</title>
    <pubDate>Wed, 18 Nov 2026 13:14:43 GMT</pubDate>
    <sparkle:version>6</sparkle:version>
