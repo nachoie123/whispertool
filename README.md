@@ -15,7 +15,7 @@ Version 1 was Python + Tk and kept the Whisper model loaded on the GPU all day: 
 | Memory while idle | 2,588 MB | **23 MB** |
 | CPU while idle | ~2% | **0%** |
 | Microphone | on all day | **only while you hold the keys** |
-| Download | 174 MB | **1 MB** |
+| Download | 174 MB | **1.9 MB** |
 
 - **Menu bar app:** no Dock icon, no window. Opens at login. Recent dictations one click away.
 - **Live text:** while you hold the keys, a black island drops from the notch and shows what you're saying (Apple's on-device speech recognition).
@@ -23,11 +23,11 @@ Version 1 was Python + Tk and kept the Whisper model loaded on the GPU all day: 
 - **Nothing gets lost:** if Groq fails, it pastes what your Mac heard on-device; if both fail, the audio is kept and the menu offers *Retry the last audio*.
 - **Never hangs on the mic:** the audio engine is stopped on a background thread, so a slow CoreAudio teardown can't freeze the app (that was v1's worst bug).
 
-Build it: `cd mac && ./build.sh` (Xcode command line tools; it signs ad-hoc if you don't have a developer certificate).
+Build it: `cd mac && ./build.sh` (Xcode command line tools and an Apple signing certificate in `SIGN_ID`; an ad-hoc build compiles, but macOS won't load the Sparkle framework inside it).
 
 ## Privacy
 
-- **Without a key**, transcription is Apple's on-device recognition: nothing leaves your Mac.
+- **Without a key**, transcription is Apple's speech recognition in your Mac's language: on the device when macOS has that language offline (then nothing leaves your Mac), on Apple's servers when it doesn't.
 - **With your Groq key**, the audio of each dictation is sent to Groq to be transcribed, and the text to Groq to be tidied. Nothing goes to me.
 - Your key lives only in a local `config.json` (permissions 600), which is git-ignored.
 
@@ -37,7 +37,7 @@ Microphone (to hear you), Speech Recognition (live text) and Accessibility (the 
 
 ## Mac app
 
-Download `WhisperTool.pkg` from [Releases](https://github.com/nachoie123/whispertool/releases/latest). Requires Apple Silicon (M1 or later) and macOS 14 or later. Signed with Developer ID and notarized by Apple: the installer puts it in Applications and opens it. Since v2.3 it updates itself every week with [Sparkle](https://sparkle-project.org) (feed: `https://nachosanbenito.com/whispertool/appcast.xml`); if you have v2.2 or earlier, install the latest `.pkg` by hand once. To build it yourself: `mac/build.sh instalar`.
+Download `WhisperTool.pkg` from [Releases](https://github.com/nachoie123/whispertool/releases/latest). Requires Apple Silicon (M1 or later) and macOS 14 or later. Signed with Developer ID and notarized by Apple: the installer puts it in Applications and opens it. Since v2.3 it checks once a day and updates itself with [Sparkle](https://sparkle-project.org) (feed: `https://nachosanbenito.com/whispertool/appcast.xml`); if you have v2.2 or earlier, install the latest `.pkg` by hand once. To build it yourself: `mac/build.sh instalar`.
 
 ## Version 1 (Python, cross-platform)
 
