@@ -319,7 +319,7 @@
       <p class="lead">Filmed with version 1, which ran Whisper on the Mac's own chip. Version 2 keeps the same keys, adds the live island, and is far lighter:</p>
       <dl class="specs">
         <div><dt>23 MB</dt><dd>of memory and 0% CPU while it waits. Version 1 kept 2.6 GB loaded all day.</dd></div>
-        <div><dt>0.3 s</dt><dd>to transcribe a phrase with Whisper large-v3-turbo on Groq.</dd></div>
+        <div><dt>0.3 s</dt><dd>to transcribe a phrase with Whisper large-v3 on Groq.</dd></div>
         <div><dt>EN + ES</dt><dd>language detected per phrase, with a Groq key.</dd></div>
         <div><dt>4 MB</dt><dd>native app for Apple Silicon (M1 or later), macOS 14 or later. Free and open source.</dd></div>
       </dl>
@@ -355,7 +355,7 @@
       </div>
       <div class="cell c-polish rv">
         <div class="polish" aria-hidden="true"><s>So um, the call is at ten, I mean, eleven.</s><span class="after">So, the call is at eleven.</span></div>
-        <div><h3>Optional AI polish</h3><p>With your free Groq key, an AI pass removes ums and self-corrections, fixes punctuation, and can format a dictated email.</p></div>
+        <div><h3>Optional AI polish</h3><p>With your free Groq key, an AI pass removes ums and self-corrections, fixes punctuation, repairs misheard names with your vocabulary, and can format a dictated email.</p></div>
       </div>
     </div>
   </section>
@@ -364,7 +364,7 @@
     <h2 id="tw" class="rv">You choose where it listens.</h2>
     <div class="modes rv">
       <div class="mode"><div class="n">No key</div><p class="d">Apple's speech recognition, in your Mac's language. If macOS has that language on the device (US English and Spanish do on mine), nothing leaves your Mac; if not, Apple transcribes it on its servers.</p><p class="spec"><b>On your Mac</b> <span class="mute">works offline if macOS has the language</span></p></div>
-      <div class="mode"><div class="n">Your free Groq key</div><p class="d">The audio of each dictation goes to Groq's Whisper (large-v3-turbo). The text comes back in about 0.3 s, then gets tidied.</p><p class="spec"><b>0.3 s</b> <span class="mute">per phrase</span></p></div>
+      <div class="mode"><div class="n">Your free Groq key</div><p class="d">The audio of each dictation goes to Groq's Whisper (large-v3), but only if your Mac hears someone close by: silence and voices across the room stay on your Mac and paste nothing. The text comes back in about 0.3 s, then gets tidied.</p><p class="spec"><b>0.3 s</b> <span class="mute">per phrase</span></p></div>
     </div>
     <p class="nos rv">No account with me, no server of mine.</p>
   </section>
@@ -379,7 +379,7 @@
       <li class="noart"><div><b class="t">Switch on its three permissions</b><p>WhisperTool opens a small window with three buttons: <b>Microphone</b> (to hear you), <b>Speech Recognition</b> (for the live text) and <b>Accessibility</b> (for the hotkey and to paste). The app is in Spanish, so each button says «Activar…». Click each one; when all three turn green you're done. A waveform icon appears in the menu bar. Click into any text box, hold <kbd>⌥</kbd>+<kbd>⌃</kbd> and talk.</p></div></li>
     </ol>
     <div class="iwhy">
-      <p><b>Signed and notarized by Apple</b> (Developer ID Ignacio San Benito), so it opens with a double-click, no warnings. Version <span class="ver">2.4</span>. The full source code is on GitHub.</p>
+      <p><b>Signed and notarized by Apple</b> (Developer ID Ignacio San Benito), so it opens with a double-click, no warnings. Version <span class="ver">2.5</span>. The full source code is on GitHub.</p>
     </div>
     <div class="src">From source instead (needs Xcode's command line tools and your own Apple signing certificate: without one, macOS refuses to load the updater inside):<pre>git clone https://github.com/nachoie123/whispertool.git && cd whispertool/mac && SIGN_ID="your certificate" ./build.sh instalar</pre></div>
   </section>

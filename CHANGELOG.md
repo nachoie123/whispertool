@@ -6,6 +6,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ---
 
+## [2.5] - 2026-11-25
+
+- Si no hablas, no escribe nada: ya no pega textos inventados cuando hay silencio.
+- Si alguien habla de fondo o lejos (la tele, otra persona), no lo dicta.
+- Si tu voz llega flojo, te avisa «Te oigo muy lejos» y puedes reintentar desde el menú.
+- Espera un instante al soltar la tecla, así no se pierde la última palabra.
+- Quita las autocorrecciones («perdón, digo…») y las muletillas, y escribe bien los nombres de tu vocabulario.
+- Si el servicio de pulido falla, prueba con otro modelo en lugar de pegar el texto sin corregir.
+
 ## [2.4] - 2026-11-19
 
 - Al abrirla por primera vez sale una ventana con tres botones, uno por permiso: micrófono, dictado y accesibilidad.

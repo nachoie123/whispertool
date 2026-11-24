@@ -19,7 +19,8 @@ Version 1 was Python + Tk and kept the Whisper model loaded on the GPU all day: 
 
 - **Menu bar app:** no Dock icon, no window. Opens at login. Recent dictations one click away.
 - **Live text:** while you hold the keys, a black island drops from the notch and shows what you're saying (Apple's on-device speech recognition).
-- **Whisper on Groq:** with your own free [Groq key](https://console.groq.com/keys), the audio goes to Whisper large-v3-turbo (~0.3 s per phrase, language detected per phrase), then an AI pass removes ums and self-corrections and fixes punctuation. Start with "this is an email…" and it formats an email.
+- **Whisper on Groq:** with your own free [Groq key](https://console.groq.com/keys), the audio goes to Whisper large-v3 (~0.3 s per phrase, language detected per phrase; large-v3-turbo if it's busy), then an AI pass removes ums and self-corrections, fixes punctuation and uses your vocabulary to repair misheard names. Start with "this is an email…" and it formats an email.
+- **Says nothing when you say nothing:** before anything is sent, your Mac checks that someone is speaking, and close to the mic (Apple's on-device sound classifier). Silence, key clicks or a voice across the room paste nothing.
 - **Nothing gets lost:** if Groq fails, it pastes what your Mac heard on-device; if both fail, the audio is kept and the menu offers *Retry the last audio*.
 - **Never hangs on the mic:** the audio engine is stopped on a background thread, so a slow CoreAudio teardown can't freeze the app (that was v1's worst bug).
 
