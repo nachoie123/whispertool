@@ -110,19 +110,19 @@
   .sec{padding-top:104px}
 
   /* film + specs */
-  .film{display:grid;grid-template-columns:1fr 360px;gap:64px;align-items:start}
-  .film .ftext{padding-top:56px}
+  .film{display:grid;grid-template-columns:1fr;gap:40px}
+  .film .ftext{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:24px 64px;align-items:start}
+  .film .ftext>*{grid-column:1}.film .ftext .specs{grid-column:2;grid-row:1 / span 2;margin-top:6px}
   .film .lead{margin-top:16px;font-size:17px;color:var(--mute);max-width:520px}
   .specs{margin:36px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:28px 40px}
   .specs div{border-top:1px solid var(--line);padding-top:14px}
   .specs dt{font-size:34px;font-weight:300;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
   .specs dd{margin:6px 0 0;color:var(--mute);font-size:15px}
   .player{position:relative;margin:0;background:var(--panel);border-radius:var(--r-panel);padding:14px}
-  .player video{display:block;width:100%;aspect-ratio:9/16;height:auto;border-radius:14px;background:#111}
+  .player video{display:block;width:100%;aspect-ratio:16/9;height:auto;border-radius:14px;background:#000}
   .play{position:absolute;inset:14px;display:grid;place-items:center;padding:0;border:0;border-radius:14px;background:linear-gradient(rgb(0 0 0/0) 55%,rgb(0 0 0/.6));color:#fff;font-family:inherit;cursor:pointer}
   .play i{display:grid;place-items:center;width:84px;height:58px;border-radius:16px;background:rgb(23 23 23/.82);box-shadow:0 6px 24px rgb(0 0 0/.45);transition:transform .3s var(--ease),background-color .15s}
   .play i svg{width:26px;height:26px;margin-left:2px}
-  .play i{position:relative;top:10%} /* below the waveform pill of the poster */
   .play span{position:absolute;left:18px;bottom:16px;font-size:15px;font-weight:500;line-height:1.2;text-align:left;text-shadow:0 1px 8px rgb(0 0 0/.6)}
   .play small{position:absolute;right:14px;bottom:14px;padding:3px 7px;border-radius:6px;background:rgb(0 0 0/.78);color:#fff;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums}
   .play:hover i,.play:focus-visible i{background:#ff0033}
@@ -218,10 +218,10 @@
 
   @media (max-width:900px){
     .hhead{grid-template-columns:1fr;gap:18px}
-    .film{grid-template-columns:1fr;gap:28px}
-    .film .player{max-width:360px;width:100%;justify-self:center;order:2}
+    .film{gap:28px}
     .film .ftext{display:contents}
-    .film h2{order:0}.film .lead{order:1;margin-top:-12px}.film .specs{order:3;margin-top:0}
+    .film h2{order:0}.film .lead{order:1;margin-top:-12px}.film .player{order:2}.film .specs{order:3;margin-top:0;grid-column:1;grid-row:auto}
+    .film .ftext .specs,.film .ftext>*{grid-column:1;grid-row:auto}
     .bento{grid-template-columns:1fr 1fr}
     .c-live,.c-polish{grid-column:span 2}
     .c-hold,.c-any,.c-lang,.c-bar{grid-column:span 1}
@@ -315,8 +315,8 @@
 
   <section class="sec film" id="film" aria-labelledby="tf">
     <div class="ftext rv">
-      <h2 id="tf">The 43-second film, with sound.</h2>
-      <p class="lead">Filmed with version 1, which ran Whisper on the Mac's own chip. Version 2 keeps the same keys, adds the live island, and is far lighter:</p>
+      <h2 id="tf">The 40-second film, with sound.</h2>
+      <p class="lead">Every dictation in it is real: version 2.5 hearing synthetic voices through a virtual microphone, then typing into TextEdit, VS Code and Terminal. The keyboard is a 3D render.</p>
       <dl class="specs">
         <div><dt>23 MB</dt><dd>of memory and 0% CPU while it waits. Version 1 kept 2.6 GB loaded all day.</dd></div>
         <div><dt>0.3 s</dt><dd>to transcribe a phrase with Whisper large-v3 on Groq.</dd></div>
@@ -325,8 +325,8 @@
       </dl>
     </div>
     <figure class="player rv">
-      <video src="whispertool-promo.mp4" poster="poster-hold.jpg" width="1080" height="1920" controls playsinline preload="metadata" aria-label="WhisperTool promo film, 43 seconds, with sound"></video>
-      <button class="play" type="button" aria-label="Play the 43 second film with sound"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5Z"/></svg></i><span>Watch the film, sound on</span><small>0:43</small></button>
+      <video src="whispertool-film.mp4" poster="poster-film.jpg" width="1920" height="1080" controls playsinline preload="metadata" aria-label="WhisperTool film, 40 seconds, with sound"></video>
+      <button class="play" type="button" aria-label="Play the 40 second film with sound"><i aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5Z"/></svg></i><span>Watch the film, sound on</span><small>0:40</small></button>
     </figure>
   </section>
 

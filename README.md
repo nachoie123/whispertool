@@ -4,6 +4,9 @@
 
 > This is a personal, **non-commercial** project — I built it to make my own day easier and I'm sharing it free for anyone who wants to try it. It started as a fork of [**WisprTool by FuturMinds**](https://github.com/futurminds/whispertool) — full credit to them for the original tool and idea.
 
+
+Watch the 40-second film: https://nachosanbenito.com/whispertool/#film
+
 ---
 
 ## Version 2: native Mac app (`mac/`)
